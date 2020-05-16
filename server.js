@@ -1,26 +1,21 @@
 const express = require("express");
-const mongojs = require("mongojs");
 const logger = require("morgan");
-const path = require("path");
+const mongoose = require("mongoose");
+const mongojs = require("mongojs");
+
+const db = require ("./models");
+const path = require("path"); 
 
 const app = express();
 
 app.use(logger("dev"));
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
 app.use(express.static("public"));
 
-const databaseUrl = "mongodb://localhost:27017/workouts";
-const workouts = [""];
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workouts", {useNewUrlParser: true});
 
-const db = mongojs(databaseUrl, workouts);
-
-db.on("error", error => {
-  console.log("Database Error:", error);
-});
-
+// HTML ROUTES //
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname + "./public/index.html"));
 });
@@ -33,21 +28,50 @@ app.get("/stats", (req, res) => {
   res.sendFile(path.join(__dirname + "/public/stats.html"));
 });
 
-app.post("/api/workouts", (req, res) => {
-  console.log("hitting Route");
-  console.log(req.body);
-  console.log(req.params);
-  
-});
 
-app.put ("/api/workouts/:id", (req, res) => {
-  console.log("Hitting Route with id");
-  console.log(req.params);
-  console.log(req.body);
-
+// API ROUTES //
+app.get("/api/workouts", (req,res) => {
+  db.Workout.find({})
+  .then(workout => {
+      res.json(workout);
+  })
+  .catch(err => {
+      res.json(err);
+  });
 })
 
+app.get("/api/workouts/range", (req, res) => {
+  db.Workout.find({})
+  .then(stat => {
+      res.json(stat);
+  })
+  .catch(err => {
+      res.json(err);
+  });
+}); 
 
-app.listen(3000, () => {
-  console.log("App running on port 3000!");
+app.post("/api/workouts", (req, res) => {
+    db.Workout.create({})
+    .then(addWorkout => res.json(addWorkout))
+    .catch(err => {
+        console.log("err", err)
+        res.json(err)
+    })   
+});
+
+app.put ("/api/workouts/:id", (req,res) => {
+  console.log(req.params);
+  db.Workout.findByIdAndUpdate(
+    req.params.id,
+    { $set: { exercises: req.body } }
+)
+    .then(updateWorkout => res.json(updateWorkout))
+    .catch(err => {
+        console.log("err", err)
+        res.json(err)
+    })
+  })
+
+app.listen(4000, () => {
+  console.log("App running on port 4000!");
 });
