@@ -1,7 +1,6 @@
 const express = require("express");
 const logger = require("morgan");
 const mongoose = require("mongoose");
-const mongojs = require("mongojs");
 
 const db = require ("./models");
 const path = require("path"); 
