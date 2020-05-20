@@ -3,7 +3,8 @@ const logger = require("morgan");
 const mongoose = require("mongoose");
 
 const db = require ("./models");
-const path = require("path"); 
+const path = require("path");
+const PORT =  process.env.PORT || 4000
 
 const app = express();
 
@@ -75,6 +76,6 @@ app.put ("/api/workouts/:id", (req,res) => {
     })
   })
 
-app.listen(4000, () => {
-  console.log("App running on port 4000!");
+app.listen(PORT, () => {
+  console.log("App running on port" + PORT);
 });
